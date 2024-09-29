@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员页面</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>管理员页面</h1>
+
+        <h2>选手总分及评分记录</h2>
+        <div id="adminBoard">
+            <ul id="adminList"></ul>
+        </div>
+
+        <button id="clearScores">清空所有数据</button>
+    </div>
+
+    <script>
+        function displayScores() {
+            let scores = JSON.parse(localStorage.getItem('scores')) || {};
+            let adminList = document.getElementById('adminList');
+            adminList.innerHTML = "";
+
+            let sortedParticipants = Object.keys(scores).sort((a, b) => {
+                let totalA = scores[a].reduce((sum, score) => sum + score, 0);
+                let totalB = scores[b].reduce((sum, score) => sum + score, 0);
+                return totalB - totalA; // 按总分降序排序
+            });
+
+            sortedParticipants.forEach(participant => {
+                let participantScores = scores[participant];
+                let totalScore = participantScores.reduce((sum, score) => sum + score, 0);
+
+                let listItem = document.createElement('li');
+                listItem.textContent = '选手编号: ' + participant + ' - 总分: ' + totalScore + ' 分 (详细: ' + participantScores.join(', ') + ')';
+                adminList.appendChild(listItem);
+            });
+        }
+
+        // 清空数据功能
+        document.getElementById('clearScores').addEventListener('click', function() {
+            if (confirm('确定要清空所有评分数据吗？')) {
+                localStorage.removeItem('scores');
+                displayScores(); // 重新刷新页面
+            }
+        });
+
+        // 检查身份
+        if (localStorage.getItem('role') !== 'admin') {
+            alert('无权限访问此页面');
+            window.location.href = 'login.html';
+        } else {
+            displayScores();
+        }
+    </script>
+</body>
+</html>
